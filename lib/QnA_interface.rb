@@ -60,7 +60,6 @@ class QnA_interface
       print_error(user)
     end
   end
-  
    
   def run
     until @logged_in
@@ -80,19 +79,20 @@ class QnA_interface
     print "\n(1) Post a question.".yellow
     print "\n(2) View your questions.".yellow
     print "\n(3) View all questions.".yellow
-    print "\n(4) View questions by other users.".yellow
+    print "\n(4) Answer a Question.".yellow
     sleep(0.1)
     print "\nPlease enter the number of your choice or 'q' to quit: ".blue
     input = gets.chomp.downcase
     case input
     when "1"
-      add_question
+      Question.add_question(@current_user)
     when "2"
       view_my_questions
     when "3"
-      view_all_questions
+      Question.view_all_questions
     when "4"
-      view_questions_by_other_users
+      Question.view_all_questions
+      #prompt user for which question to answer
     when "q"
       return @quit = true
     else
@@ -106,36 +106,11 @@ class QnA_interface
   end
   
   
-  def add_question
-    print "Please enter your question".blue
-    p "User id: #{@current_user.id}"
-    body = gets.chomp
-    question = Question.new(:user_id => @current_user.id, :body => body)
-    if question.valid?
-      question.save!
-      print "\nYour question has been added successfully!".green
-    else
-      print_error(question)
-    end
-  end
-  
-  def view_all_questions_with_author
-    users = User.all
-    users.each do |user|
-      questions = Question.find_all_by_user_id(user.id)
-      questions.each { |question| print "\n#{question.body} by #{user.fname} #{user.lname}"}
-    end
-  end
-  
-  def view_all_questions
-    questions = Question.all
-    questions.each_with_index { |question, i| print "\n (#{i + 1}) #{question.body}"}
-  end
   
   def view_my_questions
-    user_questions = Question.find_all_by_user_id(@current_user.id)
-    #user_questions = @current_user.list_user_questions
-    user_questions.each_with_index { |question, i| print "\n (#{i + 1}) #{question.body}"}
+    # user_questions = Question.find_all_by_user_id(@current_user.id)
+    user_questions = @current_user.list_my_questions
+    user_questions.each { |question| print "\n (#{question.id}) #{question.body}"}
   end
   
   def view_questions_by_other_users
