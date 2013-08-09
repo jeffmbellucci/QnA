@@ -5,22 +5,25 @@ class Question < ActiveRecord::Base
   validates :user_id, :body, :presence => true
   
   
-  
   belongs_to(:user,
               :class_name => "User",
               :foreign_key => :user_id,
               :primary_key => :id
   )
+  has_many(:answers,
+            :foreign_key => :question_id,
+            :class_name => "Answer",
+            :primary_key => :id
+  )
   
-  
- #SELECT question.*, user.fname FROM questions JOIN users ON question_id = user_id
+ #SELECT question.*, user.fname AS usersname FROM questions JOIN users ON users.id = questions.user_id
   
   def self.view_all_questions
     #questions = self.select("questions.*, users.*").joins("JOIN users ON users.id = questions.id")
-   questions = self.all
-   # p questions
+   questions = self.includes(:user).all
+   p questions
     questions.each do |question| 
-       user = User.find_by_id(question.user_id)
+       user = question.user
       print "\n (#{question.id}) #{question.body}" + " by #{user.fname}".blue
     end
   end
